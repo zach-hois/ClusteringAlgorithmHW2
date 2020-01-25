@@ -1,7 +1,7 @@
 # HW2 Skeleton
 
 [![Build
-Status](https://travis-ci.org/zach-hois/hw2-skeleton.svg?branch=master)](https://travis-ci.org/zach-hois/hw2-skeleton)
+Status](https://travis-ci.org/zach-hois/ClusteringAlgorithmHW2.svg?branch=master)](https://travis-ci.org/zach-hois/ClusteringAlgorithmHW2)
 
 Skeleton for clustering project.
 
