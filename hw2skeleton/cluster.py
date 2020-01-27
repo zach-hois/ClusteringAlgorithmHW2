@@ -1,4 +1,6 @@
 from .utils import Atom, Residue, ActiveSite
+import numpy as np
+import matplotlib.pyplot as plt
 
 def compute_similarity(site_a, site_b):
     """
