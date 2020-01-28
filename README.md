@@ -99,3 +99,5 @@ gave clusting algorithm the coordinates and compute similarity
 OR
 use the similarity metric as the clustering input
 
+the ActiveSite Class contains a list of the Residue Class (access with ActiveSite.residues) and then each of those Residues in that list will then have a list of Class Atom (Residue.atoms)
+
