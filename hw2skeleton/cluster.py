@@ -83,12 +83,12 @@ def cluster_by_partitioning(active_sites):
     ##### REPEAT UNTIL THERE ARE NO MORE CHANGES TO THE CLUSTERS #####
     while True: 
         closest_centroids = df['closest'].copy(deep=True)
-        centroids = update(centroids)
-        df = assignment(df, centroids)
-        if closest_centroids.equals(df['closest']):
-            break
+        centroids = update(centroids) #previously defined update function realigns centroids
+        df = assignment(df, centroids) #new dataframe is created with new centroids
+        if closest_centroids.equals(df['closest']): 
+            break #end the while loop if there are no newly assigned points 
 
-
+    #example plot for what would be shown in 2d
     fig = plt.figure(figsize=(5, 5))
     plt.scatter(df['x'], df['y'])
     for i in centroids.keys():
