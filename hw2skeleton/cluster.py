@@ -16,16 +16,39 @@ def compute_similarity(site_a, site_b):
 
 
     print("THIS LINE IS TO TEST THAT COMPUTE SIMILARITY IS RUNNING")
-    x = site_a.residues[0].atoms[0].coords
-    y = site_b.residues[0].atoms[0].coords
+    
+    ## my GOAL is to have my similarity matrix compare how many amino acids
+    ## residues of each protein have in common and normalize it to total they could have in common
+    ##  of the residues to account for the varying length of the residues
 
-    #planning on computing all pairs and then summing up
 
-    distance = math.sqrt(sum([(a - b) ** 2 for a, b in zip(x, y)]))
-    print("EUCLIDEAN DISTANCE:",distance)
-    
-    
-    
+    AminoAcids = {'ALA': 'A', 'ARG': 'R', 'ASN': 'N', 'ASP': 'D', 'CYS': 'C',
+    'GLU': 'E', 'GLN': 'Q', 'GLY': 'G', 'HIS': 'H',
+    'ILE': 'I', 'LEU': 'L', 'LYS': 'K', 'MET': 'M', 'PHE': 'F',
+    'PRO': 'P', 'SER': 'S', 'THR': 'T', 'TRP': 'W',
+    'TYR': 'Y', 'VAL': 'V'} #shorten them to their 1 letter code to make this easier
+
+
+    def AminoAcidSequence(active_site):
+        return [AminoAcids[x.type[0:3]] for x in active_site.residues]
+        #convert the input sequences so they are more workable
+
+    seqA = AminoAcidSequence(site_a) #take the inputs to the compute similarity function
+    seqB = AminoAcidSequence(site_b) #and convert their sequences using new function
+    observedRes = set(seqA + seqB) #these are the residues that are observed in the inputs
+    total = 0 #initializations
+    common = 0
+    for res in observedRes:
+        inA = seqA.count(res)
+        inB = seqB.count(res)
+        if inA < inB:
+            common += inA
+            total += inB
+        else:
+            common += inA
+            total += inB
+    similarity = common / total
+    print("SIMILARITY IS:", similarity)
     return similarity
 
 
@@ -39,8 +62,8 @@ def cluster_by_partitioning(active_sites):
             ActiveSite instances)
     """
     # Fill in your code here!
-    compute_similarity(active_sites[0], active_sites[1])
-
+    SMatrix = np.asarray([np.asarray([compute_similarity(i,j) for i in active_sites]) for j in active_sites])
+    
 
     df = pd.DataFrame({ #placeholder, DF will soon be similarity matrix
     'x': [12, 20, 28, 18, 29, 33, 24, 45, 45, 52, 51, 52, 55, 53, 55, 61, 64, 69, 72],
@@ -51,7 +74,7 @@ def cluster_by_partitioning(active_sites):
         i+1: [np.random.randint(0,80), np.random.randint(0,80)] #select a value from dataframe for centroid
         for i in range(k)
     } #randomly select three of the points to be the arbitrary centroids to start algorithm
-    
+
 
     ##### BEGIN ASSIGNMENT TO CENTROID #####
     def assignment(df, centroids): #we will assign each value in df to a centroid
@@ -95,14 +118,29 @@ def cluster_by_partitioning(active_sites):
          plt.scatter(*centroids[i])
     plt.xlim(0, 80)
     plt.ylim(0, 80)
-    plt.show()
+    #plt.show()
 
+
+
+    #####messing around with comparing the active site residues
     print(active_sites[0].name)
-    print(active_sites[0].residues)
-    print(active_sites[0].residues[0].atoms)
+    print(len(active_sites[0].residues))
+    print(len(active_sites[1].residues))
+    """
+    for i in range(1):
+        #print(len(active_sites[i].residues))
+        for j in range(130):
+            a = (active_sites[i].residues[i].atoms)
+            #print(a)
 
+            b = (active_sites[j].residues[i].atoms)
+            #print(b)
+            c = [item for item in b if item in a]
+            print(c)
 
     return []
+    """ 
+
 
 
 def cluster_hierarchically(active_sites):
