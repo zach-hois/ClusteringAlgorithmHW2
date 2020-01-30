@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import math
 import pandas as pd
 import copy
+import umap
+import seaborn as sns
 
 def compute_similarity(site_a, site_b):
     """
@@ -89,7 +91,6 @@ def cluster_by_partitioning(active_sites):
         centroid_distance_cols = ['distance_from_{}'.format(i) for i in centroids.keys()]
         df['closest'] = df.loc[:, centroid_distance_cols].idxmin(axis=1)
         df['closest'] = df['closest'].map(lambda x: int(x.lstrip('distance_from_')))
-        
         return df
 
     df = assignment(df, centroids) #initialize the new dataframe with each sorted to a centroid
@@ -117,13 +118,11 @@ def cluster_by_partitioning(active_sites):
 
     #example plot for what would be shown in 2d
     
-    fig = plt.figure(figsize=(5, 5))
-    for j in range(len(df.index)):
-        plt.scatter(df[j])
-    for i in centroids.keys():
-         plt.scatter(*centroids[i])
-    plt.xlim(0, 100)
-    plt.ylim(0, 100)
+    reducer = umap.UMAP()
+    embedding = reducer.fit_transform(df)
+
+    plt.scatter(embedding[:, 0], embedding[:, 1])
+    plt.title('UMAP projection of df', fontsize=24)
     plt.show()
     
     #####messing around with comparing the active site residues
