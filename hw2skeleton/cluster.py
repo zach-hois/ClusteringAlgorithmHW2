@@ -65,18 +65,16 @@ def cluster_by_partitioning(active_sites):
     My k-means clusering algorithm was adapted from: http://benalexkeen.com/k-means-clustering-in-python/
     """
     # Fill in your code here!
-    SMatrix = np.asarray([ #compile the similarity matrix by iterating all of the 
+    df = 100 - pd.DataFrame(
+            np.asarray([ #compile the similarity matrix by iterating all of the 
                 np.asarray([  #protein structures over each other
                     compute_similarity(i,j) for i in active_sites]) 
-                         for j in active_sites])
-
-
-    df = pd.DataFrame({'x': np.asarray(np.mean(SMatrix, axis = 0)),
-                       'y': np.asarray(np.mean(SMatrix, axis = 1))})
+                         for j in active_sites]))
+    
 
     k = 3 #arbitrary beginning value
     centroids = {
-        i+1: [np.random.randint(0,100), np.random.randint(0,100)] #select a value from dataframe for centroid
+        i+1: [np.random.randint(0,100)] #select a value from dataframe for centroid
         for i in range(k)
     } #randomly select three of the points to be the arbitrary centroids to start algorithm
 
@@ -84,48 +82,50 @@ def cluster_by_partitioning(active_sites):
     def assignment(df, centroids): #we will assign each value in df to a centroid
         for i in centroids.keys():
         #euclidian distance calculation
-            df['distance_from_{}'.format(i)] = ( #distance of each point from the centroid
-              np.sqrt((df['x'] - centroids[i][0]) ** 2 + (df['y'] - centroids[i][1]) ** 2)
+            for j in range(len(df.index)):
+                df['distance_from_{}'.format(i)] = ( #distance of each point from the centroid
+                    np.sqrt((centroids[i][0] - df[j] ) ** 2)
         )
         centroid_distance_cols = ['distance_from_{}'.format(i) for i in centroids.keys()]
         df['closest'] = df.loc[:, centroid_distance_cols].idxmin(axis=1)
         df['closest'] = df['closest'].map(lambda x: int(x.lstrip('distance_from_')))
-       
+        
         return df
 
     df = assignment(df, centroids) #initialize the new dataframe with each sorted to a centroid
+    print(df.head())
 
     def update(k): #change the value of the centroids to be more representative of the cluster
         for i in centroids.keys():
-            centroids[i][0] = np.mean(df[df['closest'] == i]['x'])
-            centroids[i][1] = np.mean(df[df['closest'] == i]['y'])
+            for j in range(len(df.index)):
+                centroids[i][0] = np.mean(df[df['closest'] == i][j])
         return k #k means takes the average x and y and moves the centroid closer 
 
     centroids = update(centroids) #update the previous arbitrary centroids to be more accurate
-
     ##### REPEAT ASSIGNMENT TO CENTROID #####
 
     df = assignment(df, centroids)
-
+    print(df.head())
     ##### REPEAT UNTIL THERE ARE NO MORE CHANGES TO THE CLUSTERS #####
     while True: 
         closest_centroids = df['closest'].copy(deep=True)
         centroids = update(centroids) #previously defined update function realigns centroids
         df = assignment(df, centroids) #new dataframe is created with new centroids
+        print(df.head())
         if closest_centroids.equals(df['closest']): 
             break #end the while loop if there are no newly assigned points 
 
     #example plot for what would be shown in 2d
+    
     fig = plt.figure(figsize=(5, 5))
-    plt.scatter(df['x'], df['y'])
+    for j in range(len(df.index)):
+        plt.scatter(df[j])
     for i in centroids.keys():
          plt.scatter(*centroids[i])
-    plt.xlim(0, 80)
-    plt.ylim(0, 80)
-    #plt.show()
-
-
-
+    plt.xlim(0, 100)
+    plt.ylim(0, 100)
+    plt.show()
+    
     #####messing around with comparing the active site residues
     """
     for i in range(1):
@@ -154,5 +154,14 @@ def cluster_hierarchically(active_sites):
     """
 
     # Fill in your code here!
+    distance = 100- np.asarray([ #compile the similarity matrix by iterating all of the 
+                np.asarray([  #protein structures over each other
+                    compute_similarity(i,j) for i in active_sites]) 
+                         for j in active_sites])
+    inCluster = np.array(list(range(0, distance.shape[0])))
+    clusterList = list(range(0, distance.shape[0]))
+    print(distance)
+    print(clusterList)
+    print(inCluster)
 
     return []

@@ -80,10 +80,10 @@ def write_clustering(filename, clusters):
 
     out = open(filename, 'w')
 
-    for i in range(len(clusters)):
-        out.write("\nCluster %d\n--------------\n" % i)
-        for j in range(len(clusters[i])):
-            out.write("%s\n" % clusters[i][j])
+   # for i in range(len(clusters)):
+    #    out.write("\nCluster %d\n--------------\n" % i)
+     #   for j in range(len(clusters[i])):
+      #      out.write("%s\n" % clusters[i][j])
 
     out.close()
 
