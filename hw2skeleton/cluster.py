@@ -73,6 +73,7 @@ def cluster_by_partitioning(active_sites):
                     compute_similarity(i,j) for i in active_sites]) 
                          for j in active_sites]))
     
+    colmap = {1: 'r', 2: 'g', 3: 'b'}
 
     k = 3 #arbitrary beginning value
     centroids = {
@@ -121,26 +122,12 @@ def cluster_by_partitioning(active_sites):
     reducer = umap.UMAP()
     embedding = reducer.fit_transform(df)
 
+
     plt.scatter(embedding[:, 0], embedding[:, 1])
     plt.title('UMAP projection of df', fontsize=24)
+    #for i in centroids.keys():
+     #   plt.scatter(*centroids[i], *centroids[i], color=colmap[i])
     plt.show()
-    
-    #####messing around with comparing the active site residues
-    """
-    for i in range(1):
-        #print(len(active_sites[i].residues))
-        for j in range(130):
-            a = (active_sites[i].residues[i].atoms)
-            #print(a)
-
-            b = (active_sites[j].residues[i].atoms)
-            #print(b)
-            c = [item for item in b if item in a]
-            print(c)
-
-    return []
-    """ 
-
 
 
 def cluster_hierarchically(active_sites):
