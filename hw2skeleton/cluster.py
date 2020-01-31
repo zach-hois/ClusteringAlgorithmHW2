@@ -138,16 +138,46 @@ def cluster_hierarchically(active_sites):
     Output: a list of clusterings
             (each clustering is a list of lists of Sequence objects)
     """
-
+    print("hierarchical is working")
     # Fill in your code here!
-    distance = 100- np.asarray([ #compile the similarity matrix by iterating all of the 
-                np.asarray([  #protein structures over each other
-                    compute_similarity(i,j) for i in active_sites]) 
-                         for j in active_sites])
+    df = 100 - pd.DataFrame(
+                    np.asarray([ #compile the similarity matrix by iterating all of the 
+                        np.asarray([  #protein structures over each other
+                            compute_similarity(i,j) for i in active_sites]) 
+                              for j in active_sites]))
+
     inCluster = np.array(list(range(0, distance.shape[0])))
     clusterList = list(range(0, distance.shape[0]))
-    print(distance)
-    print(clusterList)
-    print(inCluster)
 
-    return []
+    for i in range(len(df.index)):
+        df[i][i] = np.inf
+
+    while (len(clusterList)) > 2:
+        near = np.argmin(df)
+        nearI, nearJ = int(near / len(df.index)), near % len(df.index)
+        if inCluster[nearI] != inCluster[nearJ]:
+            old = clusterList[inCluster[nearJ]] #here we join them if this is triggered
+            oldNearJ = inCluster[nearJ]
+            clusterList[inCluster[nearI]] = [
+                clusterList[inCluster[nearJ]], clusterList[inCluster[nearI]]]
+
+            inCluster[flatten(clusterList[inCluster[nearJ]])] = inCluster[nearI]
+
+            clusterList.remove(old)
+
+            for i in range(len(df.index)):
+                if inCluster[i] > oldNearJ:
+                    inCluster[i] -= 1
+        df[nearI][nearJ] = np.inf
+        df[nearJ][nearI] = np.inf
+    return clusterList
+
+    reducer = umap.UMAP()
+    embedding = reducer.fit_transform(df)
+
+
+    plt.scatter(embedding[:, 0], embedding[:, 1])
+    plt.title('UMAP projection of df', fontsize=24)
+    #for i in centroids.keys():
+     #   plt.scatter(*centroids[i], *centroids[i], color=colmap[i])
+    plt.show()
