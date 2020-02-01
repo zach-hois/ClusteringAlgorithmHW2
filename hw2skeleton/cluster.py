@@ -7,6 +7,7 @@ import copy
 import umap
 import seaborn as sns
 
+
 def compute_similarity(site_a, site_b):
     """
     Compute the similarity between two given ActiveSite instances.
@@ -20,7 +21,6 @@ def compute_similarity(site_a, site_b):
     ## my GOAL is to have my similarity matrix compare how many amino acids
     ## residues of each protein have in common and normalize it to total they could have in common
     ##  of the residues to account for the varying length of the residues
-
 
     AminoAcids = {'ALA': 'A', 'ARG': 'R', 'ASN': 'N', 'ASP': 'D', 'CYS': 'C',
                   'GLU': 'E', 'GLN': 'Q', 'GLY': 'G', 'HIS': 'H', 'ILE': 'I', 
@@ -119,11 +119,11 @@ def cluster_by_partitioning(active_sites):
 
     #example plot for what would be shown in 2d
     
-    reducer = umap.UMAP()
+    reducer = umap.UMAP() #UMAP to make it easy to visualize
     embedding = reducer.fit_transform(df)
 
 
-    plt.scatter(embedding[:, 0], embedding[:, 1])
+    plt.scatter(embedding[:, 0], embedding[:, 1], c=df['closest']) #make the plot
     plt.title('UMAP projection of df', fontsize=24)
     #for i in centroids.keys():
      #   plt.scatter(*centroids[i], *centroids[i], color=colmap[i])
@@ -139,22 +139,40 @@ def cluster_hierarchically(active_sites):
             (each clustering is a list of lists of Sequence objects)
     """
     print("hierarchical is working")
+
+    def flatten(flatList): #this is a solution in order to flatten a nested list
+        if isinstance(flatList, list): #its used in the clustering loop
+            keepGoing = True #go more for list
+            while keepGoing:
+                lll = []
+                keepGoing = False
+                for x in flatList:
+                    if isinstance(x, list):
+                        lll += x
+                        keepGoing = True
+                    else:
+                        lll.append(x)
+                flatList = lll
+        return flatList #returns a flat list so i can swap the clusters later on 
+
     # Fill in your code here!
-    df = 100 - pd.DataFrame(
-                    np.asarray([ #compile the similarity matrix by iterating all of the 
+    df = 100 - np.asarray([ #compile the similarity matrix by iterating all of the 
                         np.asarray([  #protein structures over each other
                             compute_similarity(i,j) for i in active_sites]) 
-                              for j in active_sites]))
+                                for j in active_sites])
 
-    inCluster = np.array(list(range(0, distance.shape[0])))
-    clusterList = list(range(0, distance.shape[0]))
+    inCluster = np.array(list(range(0, df.shape[0]))) #which cluster will the point be in
 
-    for i in range(len(df.index)):
-        df[i][i] = np.inf
+    clusterList = list(range(0, df.shape[0])) #all clusters
 
-    while (len(clusterList)) > 2:
+    for i in range(0, df.shape[0]):
+        df[i][i] = np.inf 
+    
+    
+    while (len(clusterList)) > 2: #run while there are still points to be assigned
         near = np.argmin(df)
-        nearI, nearJ = int(near / len(df.index)), near % len(df.index)
+ 
+        nearI, nearJ = int(near / df.shape[0]), near % df.shape[0]
         if inCluster[nearI] != inCluster[nearJ]:
             old = clusterList[inCluster[nearJ]] #here we join them if this is triggered
             oldNearJ = inCluster[nearJ]
@@ -165,7 +183,7 @@ def cluster_hierarchically(active_sites):
 
             clusterList.remove(old)
 
-            for i in range(len(df.index)):
+            for i in range(0, len(inCluster)):
                 if inCluster[i] > oldNearJ:
                     inCluster[i] -= 1
         df[nearI][nearJ] = np.inf
@@ -174,6 +192,7 @@ def cluster_hierarchically(active_sites):
 
     reducer = umap.UMAP()
     embedding = reducer.fit_transform(df)
+
 
 
     plt.scatter(embedding[:, 0], embedding[:, 1])

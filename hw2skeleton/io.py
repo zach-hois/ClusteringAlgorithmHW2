@@ -107,3 +107,4 @@ def write_mult_clusterings(filename, clusterings):
                 out.write("%s\n" % clusters[j][k])
 
     out.close()
+
