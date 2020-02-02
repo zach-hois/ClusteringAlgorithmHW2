@@ -22,7 +22,7 @@ def test_partition_clustering():
         active_sites.append(io.read_active_site(filepath))
 
     # update this assertion
-    assert cluster.cluster_by_partitioning(active_sites) == []
+    assert cluster.cluster_by_partitioning(active_sites) == [[2], [], [0, 1]]
 
 def test_hierarchical_clustering():
     # tractable subset

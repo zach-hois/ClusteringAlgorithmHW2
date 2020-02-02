@@ -72,14 +72,16 @@ def cluster_by_partitioning(active_sites):
                 np.asarray([  #protein structures over each other
                     compute_similarity(i,j) for i in active_sites]) 
                          for j in active_sites]))
-    
-    colmap = {1: 'r', 2: 'g', 3: 'b'}
 
     k = 3 #arbitrary beginning value
     centroids = {
-        i+1: [25+i*25] #select a value from dataframe for centroid
+        i+1: [i*25] #select a value from dataframe for centroid
         for i in range(k)
-    } #randomly select three of the points to be the arbitrary centroids to start algorithm
+    } #select three of the points to be the arbitrary centroids to start algorithm
+    #originally this was going to be [np.random.randint(0, 100)] and i was happy to learn that
+    #it correctly clustered the points together each time, however the centroid they were 
+    #assigned to was not always consistent due to the random draw so the assert statement
+    #was difficult to right. as a solution I picked values 25, 50, 75
 
     ##### BEGIN ASSIGNMENT TO CENTROID #####
     def assignment(df, centroids): #we will assign each value in df to a centroid
@@ -125,20 +127,18 @@ def cluster_by_partitioning(active_sites):
     plt.scatter(embedding[:, 0], embedding[:, 1], c=df['closest']) #make the plot
     plt.title('UMAP projection of df', fontsize=24)
     #for i in centroids.keys():
-     #   plt.scatter(*centroids[i], *centroids[i], color=colmap[i])
+     #   plt.scatter(*centroids[i], *centroids[i])
     plt.show()
     """
+    clusterList = list(range(0, df.shape[0])) #initialize output 
 
-    clusterList = list(range(0, df.shape[0]))
-    print(df['closest'])
     for i in range(len(df.index)):
         for j in range(k):
-            clusterList[i][j] = df.index[df.closest == j]
+            clusterList[j] = list(df.index[df.closest == j+1])
+    #save the row # (residue) to the correct column in the output corresponding to its centroid
+    #this iteration is similar to the one from the initialization of the centroid
 
-
-
-    print(clusterList)
-    return clusterList
+    return clusterList #output is a list with proteins assigned to clusters
 
 def cluster_hierarchically(active_sites):
     """
@@ -148,8 +148,7 @@ def cluster_hierarchically(active_sites):
     Output: a list of clusterings
             (each clustering is a list of lists of Sequence objects)
     """
-    print("hierarchical is working")
-
+    # Fill in your code here!
     def flatten(flatList): #this is a solution in order to flatten a nested list
         if isinstance(flatList, list): #its used in the clustering loop
             keepGoing = True #go more for list
@@ -165,11 +164,10 @@ def cluster_hierarchically(active_sites):
                 flatList = lll
         return flatList #returns a flat list so i can swap the clusters later on 
 
-    # Fill in your code here!
     df = 100 - np.asarray([ #compile the similarity matrix by iterating all of the 
                         np.asarray([  #protein structures over each other
                             compute_similarity(i,j) for i in active_sites]) 
-                                for j in active_sites])
+                                for j in active_sites]) #same as before
 
     inCluster = np.array(list(range(0, df.shape[0]))) #which cluster will the point be in
 
@@ -177,7 +175,6 @@ def cluster_hierarchically(active_sites):
 
     for i in range(0, df.shape[0]): #format the df to be useable in future
         df[i][i] = np.inf 
-    
     
     while (len(clusterList)) > 2: #run while there are still points to be assigned
         near = np.argmin(df)
@@ -208,7 +205,7 @@ def cluster_hierarchically(active_sites):
     plt.scatter(embedding[:, 0], embedding[:, 1])
     plt.title('UMAP projection of df', fontsize=24)
     #for i in centroids.keys():
-     #   plt.scatter(*centroids[i], *centroids[i], color=colmap[i])
+     #   plt.scatter(*centroids[i], *centroids[i])
     plt.show()
     """
 
@@ -234,12 +231,11 @@ def comparison(clusterList, active_sites):
         for j in range(i, len(clusterList)): #nested ticker
             score += np.sqrt(intraCluster[i] * intraCluster[j]) * ( #* intercluster dissimilarity
                 1.0 - np.sum([[df[index[u]][index[v]] for u in clusterList[i]] for v in clusterList[j]]
-                                ) / (len(clusterList[i]) + len(clusterList[j]))) #add the calculated score
+                                ) / (len(clusterList[i]) + len(clusterList[j]))) #add the calculated score and normalize
     
     score = (1 / (n * (n-1))) #compute the comparison value normalized to the amount of clusters
 
-
-    return score
+    return score #return a score of 0-1 
 
 
 
