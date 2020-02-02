@@ -1,11 +1,11 @@
 from .utils import Atom, Residue, ActiveSite
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import math
 import pandas as pd
-import copy
-import umap
-import seaborn as sns
+#import copy
+#import umap
+#import seaborn as sns
 
 
 def compute_similarity(site_a, site_b):
