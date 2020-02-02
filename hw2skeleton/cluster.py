@@ -118,7 +118,7 @@ def cluster_by_partitioning(active_sites):
             break #end the while loop if there are no newly assigned points 
 
     #example plot for what would be shown in 2d
-    
+    """
     reducer = umap.UMAP() #UMAP to make it easy to visualize
     embedding = reducer.fit_transform(df)
 
@@ -128,7 +128,7 @@ def cluster_by_partitioning(active_sites):
     #for i in centroids.keys():
      #   plt.scatter(*centroids[i], *centroids[i], color=colmap[i])
     plt.show()
-
+    """
 
 def cluster_hierarchically(active_sites):
     """
@@ -145,7 +145,7 @@ def cluster_hierarchically(active_sites):
             keepGoing = True #go more for list
             while keepGoing:
                 lll = []
-                keepGoing = False
+                keepGoing = False #finite 
                 for x in flatList:
                     if isinstance(x, list):
                         lll += x
@@ -165,7 +165,7 @@ def cluster_hierarchically(active_sites):
 
     clusterList = list(range(0, df.shape[0])) #all clusters
 
-    for i in range(0, df.shape[0]):
+    for i in range(0, df.shape[0]): #format the df to be useable in future
         df[i][i] = np.inf 
     
     
@@ -173,30 +173,61 @@ def cluster_hierarchically(active_sites):
         near = np.argmin(df)
  
         nearI, nearJ = int(near / df.shape[0]), near % df.shape[0]
-        if inCluster[nearI] != inCluster[nearJ]:
+        if inCluster[nearI] != inCluster[nearJ]:  #this will combine clusters
             old = clusterList[inCluster[nearJ]] #here we join them if this is triggered
-            oldNearJ = inCluster[nearJ]
+            oldNearJ = inCluster[nearJ] #hold this but itll be overwritten 
             clusterList[inCluster[nearI]] = [
                 clusterList[inCluster[nearJ]], clusterList[inCluster[nearI]]]
 
-            inCluster[flatten(clusterList[inCluster[nearJ]])] = inCluster[nearI]
+            inCluster[flatten(clusterList[inCluster[nearJ]])] = inCluster[nearI] #set the new location of a member
 
-            clusterList.remove(old)
+            clusterList.remove(old) #remove old value 
 
             for i in range(0, len(inCluster)):
                 if inCluster[i] > oldNearJ:
-                    inCluster[i] -= 1
-        df[nearI][nearJ] = np.inf
+                    inCluster[i] -= 1   #work out way down clusters when one is created
+        df[nearI][nearJ] = np.inf #format similar to before this began 
         df[nearJ][nearI] = np.inf
-    return clusterList
+    return clusterList #finish and return
 
+    """
     reducer = umap.UMAP()
     embedding = reducer.fit_transform(df)
-
-
 
     plt.scatter(embedding[:, 0], embedding[:, 1])
     plt.title('UMAP projection of df', fontsize=24)
     #for i in centroids.keys():
      #   plt.scatter(*centroids[i], *centroids[i], color=colmap[i])
     plt.show()
+    """
+
+def comparison(clusterList, active_sites):
+    """
+    I am going to use a comparison method that averages the intracluster similarities
+    and the intercluster dissimilarities to make a score that will be returned and compared
+    for both of the algorithms
+    """
+    index = {active_sites[i]: i for i in range(0,len(active_sites))} #for any amount of active sites used
+
+    df = 100 - np.asarray([ #compile the similarity matrix by iterating all of the 
+                        np.asarray([  #protein structures over each other
+                            compute_similarity(i,j) for i in active_sites]) 
+                                for j in active_sites])
+
+    n = len(clusterList)
+    intraCluster = [(np.sum([[df[index[u]][index[v]] for u in x] for v in x
+                         ])) / (len(x) ** 2) for x in clusterList] #intracluster similarity computation
+    interCluster = 1.0 - np.sum([[df[index[u]][index[v]] for u in clusterList[i]] for v in clusterList[j]]
+                                ) / (len(clusterList[i]) + len(clusterList[j])) #intercluster dissimilarity
+    score = 0 #initialization
+    for i in range(0, len(clusterList)): #for all submitted clusters
+        for j in range(i, len(clusterList)): #nested ticker
+            score += np.sqrt(intraCluster[i] * intraCluster[j]) * interCluster #add the calculated score
+    
+    score = (1 / (n * (n-1))) * score #compute the comparison value normalized to the amount of clusters
+
+    print(score)
+    return score
+
+
+
