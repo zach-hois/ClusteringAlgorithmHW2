@@ -77,7 +77,7 @@ def cluster_by_partitioning(active_sites):
 
     k = 3 #arbitrary beginning value
     centroids = {
-        i+1: [np.random.randint(0,100)] #select a value from dataframe for centroid
+        i+1: [25+i*25] #select a value from dataframe for centroid
         for i in range(k)
     } #randomly select three of the points to be the arbitrary centroids to start algorithm
 
@@ -95,7 +95,6 @@ def cluster_by_partitioning(active_sites):
         return df
 
     df = assignment(df, centroids) #initialize the new dataframe with each sorted to a centroid
-    print(df.head())
 
     def update(k): #change the value of the centroids to be more representative of the cluster
         for i in centroids.keys():
@@ -130,6 +129,17 @@ def cluster_by_partitioning(active_sites):
     plt.show()
     """
 
+    clusterList = list(range(0, df.shape[0]))
+    print(df['closest'])
+    for i in range(len(df.index)):
+        for j in range(k):
+            clusterList[i][j] = df.index[df.closest == j]
+
+
+
+    print(clusterList)
+    return clusterList
+
 def cluster_hierarchically(active_sites):
     """
     Cluster the given set of ActiveSite instances using a hierarchical algorithm.                                                                  #
@@ -163,7 +173,7 @@ def cluster_hierarchically(active_sites):
 
     inCluster = np.array(list(range(0, df.shape[0]))) #which cluster will the point be in
 
-    clusterList = list(range(0, df.shape[0])) #all clusters
+    clusterList = list(range(0, df.shape[0])) #all clusters, will be out output
 
     for i in range(0, df.shape[0]): #format the df to be useable in future
         df[i][i] = np.inf 
@@ -188,6 +198,7 @@ def cluster_hierarchically(active_sites):
                     inCluster[i] -= 1   #work out way down clusters when one is created
         df[nearI][nearJ] = np.inf #format similar to before this began 
         df[nearJ][nearI] = np.inf
+
     return clusterList #finish and return
 
     """
@@ -217,16 +228,17 @@ def comparison(clusterList, active_sites):
     n = len(clusterList)
     intraCluster = [(np.sum([[df[index[u]][index[v]] for u in x] for v in x
                          ])) / (len(x) ** 2) for x in clusterList] #intracluster similarity computation
-    interCluster = 1.0 - np.sum([[df[index[u]][index[v]] for u in clusterList[i]] for v in clusterList[j]]
-                                ) / (len(clusterList[i]) + len(clusterList[j])) #intercluster dissimilarity
+
     score = 0 #initialization
     for i in range(0, len(clusterList)): #for all submitted clusters
         for j in range(i, len(clusterList)): #nested ticker
-            score += np.sqrt(intraCluster[i] * intraCluster[j]) * interCluster #add the calculated score
+            score += np.sqrt(intraCluster[i] * intraCluster[j]) * ( #* intercluster dissimilarity
+                1.0 - np.sum([[df[index[u]][index[v]] for u in clusterList[i]] for v in clusterList[j]]
+                                ) / (len(clusterList[i]) + len(clusterList[j]))) #add the calculated score
     
-    score = (1 / (n * (n-1))) * score #compute the comparison value normalized to the amount of clusters
+    score = (1 / (n * (n-1))) #compute the comparison value normalized to the amount of clusters
 
-    print(score)
+
     return score
 
 

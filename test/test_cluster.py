@@ -46,4 +46,4 @@ def test_clustering_comparison():
         active_sites.append(io.read_active_site(filepath))
 
     # update this assertion
-    assert cluster.cluster_by_partitioning(active_sites) == []
+    assert cluster.comparison([[active_sites[0]], active_sites[1:]], active_sites) == 0.5
