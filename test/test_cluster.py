@@ -2,6 +2,7 @@ from hw2skeleton import cluster
 from hw2skeleton import io
 import os
 
+
 def test_similarity():
     filename_a = os.path.join("data", "276.pdb")
     filename_b = os.path.join("data", "4629.pdb")
@@ -46,4 +47,4 @@ def test_clustering_comparison():
         active_sites.append(io.read_active_site(filepath))
 
     # update this assertion
-    assert cluster.comparison([[active_sites[0]], active_sites[1:]], active_sites) == 0.5
+    assert cluster.comparison([[active_sites[0]], active_sites[1:]], active_sites) == -1067.5813711911358
