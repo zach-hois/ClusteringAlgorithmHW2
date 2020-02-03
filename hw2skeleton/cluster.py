@@ -1,11 +1,11 @@
 from .utils import Atom, Residue, ActiveSite
 import numpy as np
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import math
 import pandas as pd
-#import copy
-#import umap
-#import seaborn as sns
+import copy
+import umap
+import seaborn as sns
 
 
 def compute_similarity(site_a, site_b):
@@ -233,9 +233,9 @@ def comparison(clusterList, active_sites):
                 1.0 - np.sum([[df[index[u]][index[v]] for u in clusterList[i]] for v in clusterList[j]]
                                 ) / (len(clusterList[i]) + len(clusterList[j]))) #add the calculated score and normalize
     
-    score = (1 / (n * (n-1))) #compute the comparison value normalized to the amount of clusters
+    score = (1 / (n * (n-1))) * score #compute the comparison value normalized to the amount of clusters
 
-    return score #return a score of 0-1 
+    return score 
 
 
 
