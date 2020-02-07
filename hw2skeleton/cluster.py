@@ -125,7 +125,7 @@ def cluster_by_partitioning(active_sites):
 
 
     plt.scatter(embedding[:, 0], embedding[:, 1], c=df['closest']) #make the plot
-    plt.title('UMAP projection of df', fontsize=24)
+    plt.title('UMAP projection of Amino Acid Similarity', fontsize=24)
     #for i in centroids.keys():
      #   plt.scatter(*centroids[i], *centroids[i])
     plt.show()
@@ -135,9 +135,12 @@ def cluster_by_partitioning(active_sites):
     for i in range(len(df.index)):
         for j in range(k):
             clusterList[j] = list(df.index[df.closest == j+1])
+    a = np.array(clusterList)
+    print(a.shape)
+
     #save the row # (residue) to the correct column in the output corresponding to its centroid
     #this iteration is similar to the one from the initialization of the centroid
-
+    #print(clusterList)
     return clusterList #output is a list with proteins assigned to clusters
 
 def cluster_hierarchically(active_sites):
@@ -195,25 +198,27 @@ def cluster_hierarchically(active_sites):
                     inCluster[i] -= 1   #work out way down clusters when one is created
         df[nearI][nearJ] = np.inf #format similar to before this began 
         df[nearJ][nearI] = np.inf
-
+    #print(clusterList)
     return clusterList #finish and return
 
-    """
+"""
     reducer = umap.UMAP()
     embedding = reducer.fit_transform(df)
 
     plt.scatter(embedding[:, 0], embedding[:, 1])
-    plt.title('UMAP projection of df', fontsize=24)
+    plt.title('UMAP projection of Amino Acid Similarity', fontsize=24)
     #for i in centroids.keys():
      #   plt.scatter(*centroids[i], *centroids[i])
     plt.show()
-    """
+"""
 
 def comparison(clusterList, active_sites):
     """
     I am going to use a comparison method that averages the intracluster similarities
     and the intercluster dissimilarities to make a score that will be returned and compared
     for both of the algorithms
+
+    #silhouetter score!
     """
     index = {active_sites[i]: i for i in range(0,len(active_sites))} #for any amount of active sites used
 
@@ -222,7 +227,7 @@ def comparison(clusterList, active_sites):
                             compute_similarity(i,j) for i in active_sites]) 
                                 for j in active_sites])
 
-    n = len(clusterList)
+    n = len(clusterList) #input 
     intraCluster = [(np.sum([[df[index[u]][index[v]] for u in x] for v in x
                          ])) / (len(x) ** 2) for x in clusterList] #intracluster similarity computation
 
@@ -233,7 +238,7 @@ def comparison(clusterList, active_sites):
                 1.0 - np.sum([[df[index[u]][index[v]] for u in clusterList[i]] for v in clusterList[j]]
                                 ) / (len(clusterList[i]) + len(clusterList[j]))) #add the calculated score and normalize
     
-    score = (1 / (n * (n-1))) * score #compute the comparison value normalized to the amount of clusters
+    score = ((1 / (n * (n-1))) * score) / 1000 #compute the comparison value normalized to the amount of clusters
 
     return score 
 
